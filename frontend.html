@@ -1,0 +1,227 @@
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braille Chat UI</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        background: #000;
+        overflow: hidden;
+        font-family: 'Segoe UI', Arial, sans-serif;
+      }
+      .blur-ball {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        background: #ff00cc;
+        filter: blur(80px);
+        border-radius: 50%;
+        opacity: 0.7;
+        animation: moveBall 6s ease-in-out infinite alternate;
+        z-index: 0;
+      }
+      @keyframes moveBall {
+        0% {
+          top: 30%;
+          left: 20%;
+        }
+        100% {
+          top: 70%;
+          left: 80%;
+        }
+      }
+      .center-card {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+        margin: 80px auto;
+        background: rgba(24, 24, 37, 0.18);
+        border-radius: 18px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        padding: 40px 32px 32px 32px;
+        border: 2px solid #ff00cc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+      }
+      .feature-btn {
+        background: rgba(255,0,204,0.15);
+        color: #fff;
+        border: 1.5px solid #ff00cc;
+        border-radius: 8px;
+        padding: 12px 24px;
+        margin: 0 12px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.2s, border 0.2s;
+        margin-bottom: 10px;
+      }
+      .feature-btn:hover {
+        background: rgba(255,0,204,0.3);
+        border: 2px solid #ff00cc;
+      }
+      .chat-container {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+        margin: 60px auto;
+        background: rgba(24, 24, 37, 0.25);
+        border-radius: 18px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        padding: 32px 24px 24px 24px;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+      }
+      .chat-title {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 18px;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+      .chat-box {
+        flex: 1;
+        overflow-y: auto;
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        margin-bottom: 18px;
+      }
+      .chat-input {
+        width: calc(100% - 2px);
+        box-sizing: border-box;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(35, 35, 54, 0.7);
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+        margin-top: 8px;
+        margin-bottom: 0;
+        display: block;
+      }
+      .chat-input::placeholder {
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blur-ball"></div>
+    <div id="featurePage" class="center-card">
+      <div class="chat-title">Braille Converter</div>
+      <div style="margin: 32px 0 18px 0; color: #fff; font-size: 1.1rem; text-align: center;">Select a feature to begin:</div>
+      <button class="feature-btn" data-feature="text-to-braille">Text to Braille</button>
+      <button class="feature-btn" data-feature="braille-to-text">Braille to Text</button>
+    </div>
+    <div id="chatPage" class="chat-container" style="display:none;">
+      <div style="display: flex; align-items: center;">
+        <button id="backBtn" style="background: none; border: none; outline: none; cursor: pointer; margin-right: 10px; padding: 0;">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 26L12 18L20 10" stroke="#ff00cc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="chat-title" id="chatTitle">Braille Chat</div>
+      </div>
+      <div class="chat-box" id="chatBox">
+        <div>Welcome! Type your message below.</div>
+      </div>
+      <input class="chat-input" id="chatInput" placeholder="Type a message..." />
+    </div>
+    <script>
+    // Back button logic
+    const backBtn = document.getElementById('backBtn');
+    backBtn.addEventListener('click', function() {
+      chatPage.style.display = 'none';
+      featurePage.style.display = '';
+      selectedFeature = null;
+    });
+      // Feature selection logic
+      const featurePage = document.getElementById('featurePage');
+      const chatPage = document.getElementById('chatPage');
+      const chatInput = document.getElementById('chatInput');
+      const chatBox = document.getElementById('chatBox');
+      const chatTitle = document.getElementById('chatTitle');
+      let selectedFeature = null;
+
+      // Show chat page on feature select
+      featurePage.addEventListener('click', function(e) {
+        if (e.target.classList.contains('feature-btn')) {
+          selectedFeature = e.target.getAttribute('data-feature');
+          featurePage.style.display = 'none';
+          chatPage.style.display = '';
+          chatBox.innerHTML = '';
+          if (selectedFeature === 'text-to-braille') {
+            chatTitle.textContent = 'Text to Braille';
+            addMessage('Text to Braille selected. Enter your text:', 'bot');
+          } else {
+            chatTitle.textContent = 'Braille to Text';
+            addMessage('Braille to Text selected. Enter your braille (⠓⠑⠇⠇⠕):', 'bot');
+          }
+          chatInput.value = '';
+          chatInput.focus();
+        }
+      });
+
+      function addMessage(text, sender = 'user') {
+        const div = document.createElement('div');
+        div.textContent = text;
+        div.style.margin = '8px 0';
+        div.style.padding = '8px 14px';
+        div.style.borderRadius = '12px';
+        div.style.maxWidth = '80%';
+        div.style.wordBreak = 'break-word';
+        if (sender === 'user') {
+          div.style.background = 'rgba(255,0,204,0.10)';
+          div.style.alignSelf = 'flex-end';
+          div.style.color = '#fff';
+          div.style.marginLeft = '20%';
+        } else {
+          div.style.background = 'rgba(255,255,255,0.08)';
+          div.style.alignSelf = 'flex-start';
+          div.style.color = '#e0e0e0';
+        }
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && chatInput.value.trim() && selectedFeature) {
+          const msg = chatInput.value.trim();
+          addMessage(msg, 'user');
+          chatInput.value = '';
+          // Send to backend
+          let url = '';
+          let payload = {};
+          if (selectedFeature === 'text-to-braille') {
+            url = '/api/text-to-braille';
+            payload = {text: msg};
+          } else {
+            url = '/api/braille-to-text';
+            payload = {braille: msg};
+          }
+          fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+          })
+          .then(res => res.json())
+          .then(data => {
+            addMessage(data.result || 'No result', 'bot');
+          })
+          .catch(() => {
+            addMessage('Error contacting backend.', 'bot');
+          });
+        }
+      });
+    </script>
+  </body>
+  </html>
